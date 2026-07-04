@@ -8,7 +8,7 @@ Pythonで開発したファイル整理デスクトップアプリです。
 
 ## 📸 スクリーンショット
 
-![アプリ画面](screenshots/main.png)
+![Auto File Organizer メイン画面](screenshots/main.png)
 
 ---
 
