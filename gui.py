@@ -1,0 +1,128 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from datetime import datetime
+
+from organizer import Organizer
+
+class App:
+
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Auto File Organizer")
+        self.root.geometry("700x500")
+        self.root.resizable(False, False)
+        self.organizer = Organizer()
+        self.folder_path = tk.StringVar()
+
+        self.create_widgets()
+
+        start_button = tk.Button(
+            self.root,
+            text="整理開始",
+            command=self.start
+        )
+
+        start_button.pack(pady=20)
+
+        self.write_log("アプリを起動しました。")
+
+    def create_widgets(self):
+
+        title = tk.Label(
+            self.root,
+            text="Auto File Organizer",
+            font=("Yu Gothic UI", 20, "bold")
+        )
+
+        title.pack(pady=20)
+
+        label = tk.Label(
+            self.root,
+            text="整理したいフォルダ"
+        )
+
+        label.pack()
+
+        frame = tk.Frame(self.root)
+
+        frame.pack(pady=10)
+
+        entry = tk.Entry(
+            frame,
+            textvariable=self.folder_path,
+            width=60,
+            state="readonly"
+        )
+
+        entry.pack(side=tk.LEFT)
+
+        button = tk.Button(
+            frame,
+            text="参照",
+            command=self.select_folder
+        )
+
+        button.pack(side=tk.LEFT, padx=10)
+
+        log_label = tk.Label(
+            self.root,
+            text="ログ"
+        )
+        log_label.pack()
+
+        self.log_text = tk.Text(
+            self.root,
+            height=10,
+            width=80,
+            state="disabled"
+        )
+
+        self.log_text.pack(pady=10)
+
+    def select_folder(self):
+
+        folder = filedialog.askdirectory()
+
+        if folder:
+            self.folder_path.set(folder)
+
+    def run(self):
+        self.root.mainloop()
+
+    def start(self):
+        folder = self.folder_path.get()
+
+        if not folder:
+            messagebox.showwarning(
+                "フォルダ未選択",
+                "整理するフォルダを選択してください。"
+            )
+            return
+
+        self.write_log("=" * 40)
+        self.write_log("整理開始")
+        self.write_log("=" * 40)
+
+        result = self.organizer.organize(folder)
+
+        total = 0
+
+        for category, count in result.items():
+            self.write_log(f"{category}: {count}件")
+            total += count
+
+        self.write_log("")
+        self.write_log(f"合計 {total}件整理しました。")
+        self.write_log("整理が完了しました。")
+        self.write_log("=" * 40)
+
+    def write_log(self, message):
+        now = datetime.now().strftime("%H:%M:%S")
+
+        self.log_text.config(state="normal")
+        self.log_text.insert(
+            tk.END,
+            f"[{now}] {message}\n"
+        )
+        self.log_text.see(tk.END)
+        self.log_text.config(state="disabled")
