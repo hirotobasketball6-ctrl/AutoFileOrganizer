@@ -16,13 +16,15 @@ class App:
 
         self.create_widgets()
 
-        start_button = tk.Button(
+        self.start_button = tk.Button(
             self.root,
             text="整理開始",
-            command=self.start
+            command=self.start,
+            width=20,
+            height=2
         )
 
-        start_button.pack(pady=20)
+        self.start_button.pack(pady=20)
 
         self.write_log("アプリを起動しました。")
 
@@ -109,19 +111,37 @@ class App:
                 "整理するフォルダを選択してください。"
             )
             return
+        
+        
+        self.start_button.config(
+            text="整理中...",
+            state="disabled"
+        )
 
-        self.progress["value"] = 30
-        self.root.update()
+        try:
+            self.progress["value"] = 0
+            self.root.update()
 
-        result = self.organizer.organize(folder)
+            self.write_log(f"整理開始: {folder}")
 
-        self.progress["value"] = 100
-        self.root.update()
+            result = self.organizer.organize(
+                folder,
+                self.update_progress
+            )
 
-        for category, count in result.items():
-            self.write_log(f"{category}: {count}件")
+            self.progress["value"] = 100
+            self.root.update()
 
-        self.write_log("整理が完了しました。")
+            for category, count in result.items():
+                self.write_log(f"{category}: {count}件")
+
+            self.write_log("整理が完了しました。")
+
+        finally:
+            self.start_button.config(
+                text="整理開始",
+                state="normal"
+            )
 
     def write_log(self, message):
         now = datetime.now().strftime("%H:%M:%S")
@@ -134,4 +154,9 @@ class App:
         self.log_text.see(tk.END)
         self.log_text.config(state="disabled")
 
-        
+    def update_progress(self, current, total):
+        percent = (current / total) * 100
+
+        self.progress["value"] = percent
+
+        self.root.update()

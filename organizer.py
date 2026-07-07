@@ -32,13 +32,16 @@ class Organizer:
 
             counter += 1
 
-    def organize(self, folder):
+    def organize(self, folder, callback=None):
 
         folder = Path(folder)
 
+        files = [f for f in folder.iterdir() if f.is_file()]
+        total_files = len(files)
+        processed = 0
         result = {}
 
-        for file in folder.iterdir():
+        for file in files:
 
             if not file.is_file():
                 continue
@@ -72,8 +75,18 @@ class Organizer:
 
                 other.mkdir(exist_ok=True)
 
-                shutil.move(file, other / file.name)
+                destination = self.get_unique_filename(
+                    other,
+                    file.name
+                )
+
+                shutil.move(file, destination)
 
                 result["その他"] = result.get("その他", 0) + 1
+
+            processed += 1
+
+            if callback:
+                callback(processed, total_files)
 
         return result
