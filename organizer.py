@@ -6,6 +6,32 @@ from file_types import FILE_TYPES
 
 class Organizer:
 
+    
+    def get_unique_filename(self, target_folder, filename):
+        """
+        同名ファイルが存在する場合、
+        photo.jpg → photo(1).jpg のように変更する
+        """
+
+        destination = target_folder / filename
+
+        if not destination.exists():
+            return destination
+
+        stem = destination.stem
+        suffix = destination.suffix
+
+        counter = 1
+
+        while True:
+            new_name = f"{stem}({counter}){suffix}"
+            new_path = target_folder / new_name
+
+            if not new_path.exists():
+                return new_path
+
+            counter += 1
+
     def organize(self, folder):
 
         folder = Path(folder)
@@ -27,7 +53,12 @@ class Organizer:
 
                     target.mkdir(exist_ok=True)
 
-                    shutil.move(file, target / file.name)
+                    destination = self.get_unique_filename(
+                        target,
+                        file.name
+                    )
+
+                    shutil.move(file, destination)
 
                     result[category] = result.get(category, 0) + 1
 
