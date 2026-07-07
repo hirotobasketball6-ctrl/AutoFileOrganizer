@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from datetime import datetime
 
 from organizer import Organizer
@@ -64,6 +64,16 @@ class App:
 
         button.pack(side=tk.LEFT, padx=10)
 
+        # ProgressBar
+        self.progress = ttk.Progressbar(
+            self.root,
+            orient="horizontal",
+            length=500,
+            mode="determinate"
+        )
+
+        self.progress.pack(pady=10)
+
         log_label = tk.Label(
             self.root,
             text="ログ"
@@ -90,6 +100,7 @@ class App:
         self.root.mainloop()
 
     def start(self):
+
         folder = self.folder_path.get()
 
         if not folder:
@@ -99,22 +110,18 @@ class App:
             )
             return
 
-        self.write_log("=" * 40)
-        self.write_log("整理開始")
-        self.write_log("=" * 40)
+        self.progress["value"] = 30
+        self.root.update()
 
         result = self.organizer.organize(folder)
 
-        total = 0
+        self.progress["value"] = 100
+        self.root.update()
 
         for category, count in result.items():
             self.write_log(f"{category}: {count}件")
-            total += count
 
-        self.write_log("")
-        self.write_log(f"合計 {total}件整理しました。")
         self.write_log("整理が完了しました。")
-        self.write_log("=" * 40)
 
     def write_log(self, message):
         now = datetime.now().strftime("%H:%M:%S")
@@ -126,3 +133,5 @@ class App:
         )
         self.log_text.see(tk.END)
         self.log_text.config(state="disabled")
+
+        
